@@ -153,8 +153,8 @@ include 'includes/config.php';
     </div>
     <script>
 
-// API_HOST = "http://192.168.1.17:8000"; //DEVELOPMENT
-API_HOST = "https://mwbapi.mytruebank.com"; //PRODUCTION
+API_HOST = "http://192.168.1.17:8000"; //DEVELOPMENT
+//API_HOST = "https://mwbapi.mytruebank.com"; //PRODUCTION
 
 let attempt = 0;
 async function getData(retries = 2) {
@@ -196,7 +196,7 @@ while (attempt < retries) {
         document
           .querySelector(":root")
           .style.setProperty("--primary-color", filterData.color_code);
-        document.getElementById("img").src = filterData.image_link;
+        document.getElementById("img").src = API_HOST+"/"+filterData.image_link;
       }
 
       return filterData;
