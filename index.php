@@ -14,8 +14,10 @@ include 'includes/config.php';
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            padding: 20px;
+            /* padding: 4px; */
+            padding-inline:7px;
             margin: 0;
+            margin-top:6px;
         }
         .container {
             max-width: 100%;
@@ -25,7 +27,7 @@ include 'includes/config.php';
         video, iframe {
             width: 100%;
             max-width: 100%;
-            height: auto;
+            height: 190px;
             margin-top: 40px;
         }
        
@@ -61,6 +63,7 @@ include 'includes/config.php';
             transition: background-color 0.3s ease;
             cursor: pointer;
             font-size: 16px;
+            font-size: 18px
         }
         button:hover {
             background-color: #0056b3;
@@ -112,7 +115,7 @@ include 'includes/config.php';
                 font-size: 18px; /* Further adjust heading size for very small screens */
             }
             button {
-                font-size: 12px; /* Further adjust button font size for very small screens */
+                font-size: 16px; /* Further adjust button font size for very small screens */
             }
             h1{
                 font-size: 20px;
@@ -147,14 +150,14 @@ include 'includes/config.php';
             </form>
         </div>
 
-        <div class="footer" style="margin-top: 40px;">
+        <div class="footer" style="margin-top: 9px;">
             <img id="img" src=" " alt="Logo" style="height:100%; border: var(--primary-color) solid 1px; border-radius: 10px;">
         </div>
     </div>
     <script>
 
-API_HOST = "http://192.168.1.17:8000"; //DEVELOPMENT
-//API_HOST = "https://mwbapi.mytruebank.com"; //PRODUCTION
+// API_HOST = "http://192.168.1.17:8000"; //DEVELOPMENT
+API_HOST = "https://mwbapi.mytruebank.com"; //PRODUCTION
 
 let attempt = 0;
 async function getData(retries = 2) {
