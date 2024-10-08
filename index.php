@@ -6,7 +6,7 @@ include 'includes/config.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Credit Card</title>
+    <title>My True Bank</title>
     <style>
         :root {
             --primary-color: #FFFFFF;
