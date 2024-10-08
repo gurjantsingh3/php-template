@@ -9,7 +9,7 @@ include 'includes/config.php';
     <title>Credit Card</title>
     <style>
         :root {
-            --primary-color: #007BFF;
+            --primary-color: #FFFFFF;
         }
         body {
             font-family: Arial, sans-serif;
@@ -130,16 +130,18 @@ include 'includes/config.php';
 <body>
     <div class="container">
         <div class="header-container">
-            <h1 id="heading">Welcome</h1>
+            <h1 id="heading"></h1>
         </div>
 
         <div class="video-container">
+            <div id="loader" style="display: none;">Loading...</div>
+            <div id="not-found-message" style="display: none; color: red;"></div>
             <iframe id="video" width="560" height="400" src=" " frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
 
         <div class="form-container" style="margin-top: 40px;">
             <h2>Customer Details</h2>
-            <form id="detailsForm"  >
+            <form id="detailsForm">
                 <label for="name">Name</label>
                 <input type="text" id="name" name="name" placeholder="Enter your name" required>
 
@@ -155,65 +157,68 @@ include 'includes/config.php';
         </div>
     </div>
     <script>
+        // API_HOST = "http://192.168.1.17:8000"; //DEVELOPMENT
+        API_HOST = "https://mwbapi.mytruebank.com"; //PRODUCTION
 
-// API_HOST = "http://192.168.1.17:8000"; //DEVELOPMENT
-API_HOST = "https://mwbapi.mytruebank.com"; //PRODUCTION
+        let attempt = 0;
+        
+        async function getData(retries = 2) {
+    const getUrl = API_HOST + "/video_links";
+    document.getElementById("loader").style.display = "block"; // Show loader
+    document.getElementById("not-found-message").style.display = "none"; // Hide not found message
+    document.getElementById("detailsForm").style.display = "block"; // Show form initially
+    while (attempt < retries) {
+        try {
+            const response = await fetch(getUrl, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Basic dXNlcm5hbWU6cGFzc3dvcmQ=",
+                },
+            });
 
-let attempt = 0;
-async function getData(retries = 2) {
-const getUrl = API_HOST + "/video_links";
-while (attempt < retries) {
-    try {
-      const response = await fetch(getUrl, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Basic dXNlcm5hbWU6cGFzc3dvcmQ=",
-        },
-      });
+            if (response.status === 401) {
+                attempt++;
+                console.log(`401 Unauthorized - retrying (${attempt}/${retries})`);
+                if (attempt >= retries) {
+                    throw new Error("Maximum retry attempts reached");
+                }
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                continue;
+            }
 
-      if (response.status === 401) {
-        attempt++;
-        console.log(`401 Unauthorized - retrying (${attempt}/${retries})`);
-        if (attempt >= retries) {
-          throw new Error("Maximum retry attempts reached");
+            const data = await response.json();
+            const slug = window.location.pathname.split('/').pop();
+            console.log(slug, "slug");
+
+            const filterData = data._items.find((item) => item.name === slug);
+
+            if (filterData) {
+                document.getElementById("heading").innerHTML = filterData.heading;
+                document.getElementById("video").src = filterData.video_link;
+                document.querySelector(":root").style.setProperty("--primary-color", filterData.color_code);
+                document.getElementById("img").src = API_HOST + "/" + filterData.image_link;
+                document.getElementById("detailsForm").style.display = "block"; // Show the form if slug is found
+            } else {
+                document.getElementById("not-found-message").style.display = "block"; // Show not found message
+                document.getElementById("detailsForm").style.display = "none"; // Hide the form if no slug is found
+            }
+
+            return filterData;
+        } catch (e) {
+            console.log("error ", e);
+            attempt++;
+            if (attempt >= retries) {
+                throw new Error("Failed after multiple attempts");
+            }
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+        } finally {
+            document.getElementById("loader").style.display = "none"; // Hide loader after the request completes
         }
-        // Optionally, you can wait for a bit before retrying
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        continue;
-      }
-
-      const data = await response.json();
-      console.log(data, "data");
-      // Extract the slug from the URL
-      const slug = window.location.pathname.split('/').pop(); // Assumes the slug is the last part of the path
-
-      // Filter the data based on the slug
-      const filterData = data._items.find((item) => item.name === slug);
-
-      console.log(filterData, slug,"slug");
-
-      if (filterData) {
-        document.getElementById("heading").innerHTML = filterData.heading;
-        document.getElementById("video").src = filterData.video_link;
-        document
-          .querySelector(":root")
-          .style.setProperty("--primary-color", filterData.color_code);
-        document.getElementById("img").src = API_HOST+"/"+filterData.image_link;
-      }
-
-      return filterData;
-    } catch (e) {
-      console.log("error ", e);
-      attempt++;
-      if (attempt >= retries) {
-        throw new Error("Failed after multiple attempts");
-      }
-      // Optionally, you can wait for a bit before retrying
-      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
-  }
 }
+
+getData(); // Call the function to fetch data
 
 document.addEventListener("DOMContentLoaded", async function () {
   const dataUrls = await getData();
